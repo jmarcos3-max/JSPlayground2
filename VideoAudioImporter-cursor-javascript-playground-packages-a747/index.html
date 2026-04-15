@@ -1340,6 +1340,40 @@
     .modal-header h3 { margin: 0; font-size: 14px; }
     .modal-subtitle { margin: 0 0 12px 0; color: var(--text-muted); font-size: 13px; }
     .samples-list { display: grid; gap: 10px; }
+    .sample-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .sample-row .load-sample-btn {
+      flex: 1;
+      min-width: 0;
+    }
+    .copy-sample-btn {
+      flex-shrink: 0;
+      align-self: stretch;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .copy-sample-btn:hover {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(15, 118, 110, 0.35);
+    }
+    html.pg-theme-dark .copy-sample-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-color);
+    }
+    html.pg-theme-dark .copy-sample-btn:hover {
+      background: rgba(45, 212, 191, 0.12);
+      border-color: rgba(45, 212, 191, 0.35);
+    }
     .sample-btn {
       text-align: left;
       width: 100%;
@@ -2040,63 +2074,87 @@
       <p class="modal-subtitle">Getting started quick start (4 steps) plus additional Nexus SDK samples.</p>
       <div class="samples-list">
         <div class="samples-section-heading">Getting started (4 steps)</div>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="gs1">
-          <span class="sample-pill">Step 1</span>
-          <div>
-            <div>Authorize + Login / Logout</div>
-            <div class="sample-meta">getLoginStatus + Login/Logout; button on document.body (centered preview iframe).</div>
-          </div>
-        </button>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="gs2">
-          <span class="sample-pill">Step 2</span>
-          <div>
-            <div>Create Audiotool client</div>
-            <div class="sample-meta">Console-only; importing shows where to read output (same as after Run).</div>
-          </div>
-        </button>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="gs3">
-          <span class="sample-pill">Step 3</span>
-          <div>
-            <div>React to changes (events)</div>
-            <div class="sample-meta">Best with a connected project + Studio; importing shows setup (same as after Run).</div>
-          </div>
-        </button>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="gs4">
-          <span class="sample-pill">Step 4</span>
-          <div>
-            <div>Create a Heisenberg</div>
-            <div class="sample-meta">nexus.modify — spawn Heisenberg; importing shows Studio setup (same as after Run, like Step 3).</div>
-          </div>
-        </button>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="gs1">
+            <span class="sample-pill">Step 1</span>
+            <div>
+              <div>Authorize + Login / Logout</div>
+              <div class="sample-meta">getLoginStatus + Login/Logout; button on document.body (centered preview iframe).</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="gs1" aria-label="Copy Step 1 sample code">Copy</button>
+        </div>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="gs2">
+            <span class="sample-pill">Step 2</span>
+            <div>
+              <div>Create Audiotool client</div>
+              <div class="sample-meta">Console-only; importing shows where to read output (same as after Run).</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="gs2" aria-label="Copy Step 2 sample code">Copy</button>
+        </div>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="gs3">
+            <span class="sample-pill">Step 3</span>
+            <div>
+              <div>React to changes (events)</div>
+              <div class="sample-meta">Best with a connected project + Studio; importing shows setup (same as after Run).</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="gs3" aria-label="Copy Step 3 sample code">Copy</button>
+        </div>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="gs4">
+            <span class="sample-pill">Step 4</span>
+            <div>
+              <div>Create a Heisenberg</div>
+              <div class="sample-meta">nexus.modify — spawn Heisenberg; importing shows Studio setup (same as after Run, like Step 3).</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="gs4" aria-label="Copy Step 4 sample code">Copy</button>
+        </div>
         <div class="samples-section-heading">More samples</div>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="starterChain">
-          <span class="sample-pill">Routing</span>
-          <div>
-            <div>Heisenberg → Delay (Audio Cable)</div>
-            <div class="sample-meta">Create two devices and connect audio.</div>
-          </div>
-        </button>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="seqToDrums">
-          <span class="sample-pill">Notes</span>
-          <div>
-            <div>ToneMatrix → Machiniste (Note Cable)</div>
-            <div class="sample-meta">Wire a notes output into a drum sampler.</div>
-          </div>
-        </button>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="rangeSliderGain">
-          <span class="sample-pill">HTML</span>
-          <div>
-            <div>Range slider → synth gain</div>
-            <div class="sample-meta">Plain &lt;input type="range"&gt; + input listener → nexus.modify.</div>
-          </div>
-        </button>
-        <button type="button" class="sample-btn load-sample-btn" data-sample="abcVisualizer">
-          <span class="sample-pill">Notation</span>
-          <div>
-            <div>ABC visualizer + timeline import</div>
-            <div class="sample-meta">Render score in canvas and import notes to a synced cloud project.</div>
-          </div>
-        </button>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="starterChain">
+            <span class="sample-pill">Routing</span>
+            <div>
+              <div>Heisenberg → Delay (Audio Cable)</div>
+              <div class="sample-meta">Create two devices and connect audio.</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="starterChain" aria-label="Copy routing sample code">Copy</button>
+        </div>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="seqToDrums">
+            <span class="sample-pill">Notes</span>
+            <div>
+              <div>ToneMatrix → Machiniste (Note Cable)</div>
+              <div class="sample-meta">Wire a notes output into a drum sampler.</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="seqToDrums" aria-label="Copy notes sample code">Copy</button>
+        </div>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="rangeSliderGain">
+            <span class="sample-pill">HTML</span>
+            <div>
+              <div>Range slider → synth gain</div>
+              <div class="sample-meta">Plain &lt;input type="range"&gt; + input listener → nexus.modify.</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="rangeSliderGain" aria-label="Copy range slider sample code">Copy</button>
+        </div>
+        <div class="sample-row">
+          <button type="button" class="sample-btn load-sample-btn" data-sample="abcVisualizer">
+            <span class="sample-pill">Notation</span>
+            <div>
+              <div>ABC → timeline (SDK-focused)</div>
+              <div class="sample-meta">abcjs for preview; import is mostly nexus.modify (notes + optional cable).</div>
+            </div>
+          </button>
+          <button type="button" class="copy-sample-btn" data-sample="abcVisualizer" aria-label="Copy ABC sample code">Copy</button>
+        </div>
       </div>
       <div class="samples-modal-actions">
         <button id="import-sample-btn" type="button" class="action-btn" disabled>Import to Editor</button>

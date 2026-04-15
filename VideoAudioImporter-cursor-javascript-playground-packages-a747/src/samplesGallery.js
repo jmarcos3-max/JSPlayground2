@@ -25,6 +25,34 @@ function resolveSampleSource(key) {
   return "";
 }
 
+function emitSamplesFeedback(message, variant = "default") {
+  window.dispatchEvent(
+    new CustomEvent("pg:run-feedback", {
+      detail: { message, variant },
+    }),
+  );
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.setAttribute("aria-hidden", "true");
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand("copy");
+  } finally {
+    ta.remove();
+  }
+}
+
 export function initSamplesGallery() {
   const modal = document.getElementById("samples-modal");
   const openBtn = document.getElementById("browse-samples-btn");
@@ -131,6 +159,32 @@ export function initSamplesGallery() {
 
   // Event delegation keeps sample buttons working after HMR / modal content updates.
   modal?.addEventListener("click", (e) => {
+    const copyBtn = e.target?.closest?.(".copy-sample-btn");
+    if (copyBtn) {
+      e.preventDefault();
+      const key = (copyBtn.getAttribute("data-sample") || "").trim();
+      const source = resolveSampleSource(key);
+      if (!source) {
+        logToConsole(
+          `Sample not found: ${key}. Hard-refresh (Cmd+Shift+R) or rebuild the app.`,
+          true,
+        );
+        emitSamplesFeedback("Could not copy — sample missing.", "error");
+        return;
+      }
+      void (async () => {
+        try {
+          await copyTextToClipboard(source);
+          logToConsole(`Copied to clipboard: ${key}`);
+          emitSamplesFeedback(`Copied “${key}” to clipboard.`, "default");
+        } catch (err) {
+          const msg = err?.message ? String(err.message) : "Copy failed.";
+          logToConsole(`Copy failed: ${msg}`, true);
+          emitSamplesFeedback(msg, "error");
+        }
+      })();
+      return;
+    }
     const btn = e.target?.closest?.(".load-sample-btn");
     if (!btn) return;
     selectSampleButton(btn);

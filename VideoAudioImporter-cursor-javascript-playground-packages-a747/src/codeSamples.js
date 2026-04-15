@@ -168,15 +168,13 @@ addRange("Reverb mix", 0, 1, 0.01, 0.45, async (v) => {
 console.log("> Move the sliders to drive the engine.");`,
 
   abcVisualizer: `// ==========================================
-// SAMPLE: ABC VISUALIZER + IMPORT (Gakki or fast Heisenberg)
+// SAMPLE: ABC notation → Nexus timeline (SDK-focused)
 // ==========================================
-// 1) Paste ABC
-// 2) Render score in the UI panel
-// 3) (Synced project only) Import notes — optional “fast synth” skips piano soundfont load
+// abcjs only draws the score. The interesting part is nexus.modify below:
+// noteCollection, gakki, noteTrack, noteRegion, many note, optional cable, config duration.
 
-console.log("--- Loading sample: ABC Visualizer + Import ---");
+console.log("--- Loading sample: ABC → timeline ---");
 
-// Nexus timeline ticks (@audiotool/nexus utils.Ticks — https://developer.audiotool.com/js-package-documentation/variables/utils.Ticks.html)
 const NEXUS_TICKS_BEAT = 3840;
 const NEXUS_TICKS_SEMIBREVE = 15360;
 const MAX_NOTES = 1200;
@@ -186,14 +184,11 @@ const abcjs = abcjsMod.default ?? abcjsMod;
 
 const ui = document.getElementById("nexus-ui-container");
 ui.innerHTML = \`
-  <div style="font-weight:900; margin-bottom:10px;">ABC Visualizer + Import</div>
-  <p style="margin:0 0 10px; color: var(--text-muted); font-size:12px;">
-    Render notation live. Import requires a synced cloud project.
-  </p>
+  <div style="font-weight:700; margin-bottom:6px;">ABC → timeline</div>
   <textarea id="abc-source" spellcheck="false" style="
-    width:100%; min-height:140px; resize:vertical; padding:10px; border-radius:10px;
-    border:1px solid var(--border); background:#ffffff; color:#111111;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    width:100%; min-height:110px; resize:vertical; padding:8px; border-radius:8px;
+    border:1px solid var(--border); background:#fff; color:#111;
+    font-family: ui-monospace, monospace; font-size:12px;
   ">X:1
 T:Twinkle fragment
 M:4/4
@@ -201,12 +196,12 @@ L:1/8
 Q:1/4=100
 K:C
 CC GG | AA G2 |</textarea>
-  <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-    <button id="abc-render" type="button" style="padding:8px 12px;">Render score</button>
-    <button id="abc-import" type="button" style="padding:8px 12px;">Import to project</button>
+  <div style="display:flex; gap:8px; margin-top:8px;">
+    <button id="abc-render" type="button">Render</button>
+    <button id="abc-import" type="button">Import (synced project)</button>
   </div>
   <div id="abc-status" style="margin-top:8px; font-size:12px; color: var(--text-muted);"></div>
-  <div id="abc-paper" style="margin-top:12px; padding:10px; border:1px solid var(--border); border-radius:10px; overflow:auto;"></div>
+  <div id="abc-paper" style="margin-top:8px; padding:8px; border:1px solid var(--border); border-radius:8px; overflow:auto;"></div>
 \`;
 
 const sourceEl = document.getElementById("abc-source");
@@ -214,14 +209,7 @@ const statusEl = document.getElementById("abc-status");
 const paperEl = document.getElementById("abc-paper");
 const renderBtn = document.getElementById("abc-render");
 const importBtn = document.getElementById("abc-import");
-
-function isSyncedCloud() {
-  return (
-    !!nexus &&
-    typeof nexus.start === "function" &&
-    typeof nexus.stop === "function"
-  );
-}
+importBtn.title = "Requires Connect Project. Uses nexus.modify + t.create / t.update.";
 
 function setStatus(msg, isErr = false) {
   statusEl.textContent = msg;
@@ -277,154 +265,30 @@ function nextTrackOrderAmong(t) {
   return max + 1;
 }
 
-function sortedMixerChannels(t) {
-  return [...t.entities.ofTypes("mixerChannel").get()].sort((a, b) => {
-    const oa = a.fields.displayParameters?.fields?.orderAmongStrips?.value ?? 0;
-    const ob = b.fields.displayParameters?.fields?.orderAmongStrips?.value ?? 0;
-    return oa - ob;
-  });
-}
-
-function sortedCentroidChannels(t) {
-  return [...t.entities.ofTypes("centroidChannel").get()].sort((a, b) => {
-    const oa = a.fields.orderAmongChannels?.value ?? 0;
-    const ob = b.fields.orderAmongChannels?.value ?? 0;
-    return oa - ob;
-  });
-}
-
-function resolveFreeStageOrCentroidAudioInput(t) {
-  for (const ch of sortedMixerChannels(t)) {
-    const loc = ch.fields.audioInput?.location;
-    if (loc && t.entities.pointingTo.locations(loc).get().length === 0) return loc;
-  }
-  for (const ch of sortedCentroidChannels(t)) {
-    const loc = ch.fields.audioInput?.location;
-    if (loc && t.entities.pointingTo.locations(loc).get().length === 0) return loc;
-  }
-  return null;
-}
-
-function resolveStageOrCentroidAudioInputEvenIfBusy(t) {
-  const free = resolveFreeStageOrCentroidAudioInput(t);
-  if (free) return free;
-  for (const ch of sortedMixerChannels(t)) {
-    const loc = ch.fields.audioInput?.location;
-    if (loc) return loc;
-  }
-  for (const ch of sortedCentroidChannels(t)) {
-    const loc = ch.fields.audioInput?.location;
-    if (loc) return loc;
-  }
-  return null;
-}
-
-function resolveFreeMixerAudioInput(t) {
-  const direct = resolveFreeStageOrCentroidAudioInput(t);
-  if (direct) return direct;
-  for (const mm of t.entities.ofTypes("minimixer").get()) {
-    for (const key of ["channel1", "channel2", "channel3", "channel4"]) {
-      const loc = mm.fields[key]?.fields?.audioInput?.location;
-      if (loc && t.entities.pointingTo.locations(loc).get().length === 0) return loc;
-    }
-  }
-  return null;
-}
-
-function audioSocketHasCable(t, loc) {
-  if (!loc) return false;
-  return t.entities.pointingTo.locations(loc).get().length > 0;
-}
-
-function minimixerOwningChannelInput(t, channelInputLoc) {
-  if (!channelInputLoc) return null;
-  for (const mm of t.entities.ofTypes("minimixer").get()) {
-    for (const key of ["channel1", "channel2", "channel3", "channel4"]) {
-      const loc = mm.fields[key]?.fields?.audioInput?.location;
-      if (loc && loc.equals(channelInputLoc)) return mm;
-    }
-  }
-  return null;
-}
-
-function completeHalfMinimixerBridgeIfNeeded(t, audioOutLoc) {
-  if (!audioOutLoc) return true;
-  const pointing = t.entities.pointingTo.locations(audioOutLoc).get();
-  let sawMinimixerDownstream = false;
-  let couldNotFinish = false;
-  for (const ent of pointing) {
-    if (ent.entityType !== "desktopAudioCable") continue;
-    const toLoc = ent.fields.toSocket?.value;
-    if (!toLoc) continue;
-    const mm = minimixerOwningChannelInput(t, toLoc);
-    if (!mm) continue;
-    sawMinimixerDownstream = true;
-    const mainOut = mm.fields.mainOutput?.location;
-    if (!mainOut) continue;
-    if (audioSocketHasCable(t, mainOut)) continue;
-    const stageIn = resolveStageOrCentroidAudioInputEvenIfBusy(t);
-    if (!stageIn) {
-      couldNotFinish = true;
-      continue;
-    }
-    t.create("desktopAudioCable", {
-      fromSocket: mainOut,
-      toSocket: stageIn,
-    });
-  }
-  if (sawMinimixerDownstream && couldNotFinish) return false;
-  return true;
-}
-
-function bridgePlayerViaMinimixer(t, player) {
-  const outLoc = player.fields?.audioOutput?.location;
-  if (!outLoc) return false;
-  // If already wired into something, try to repair a half-bridge (minimixer mainOut not reaching Stagebox).
-  if (audioSocketHasCable(t, outLoc)) {
-    return completeHalfMinimixerBridgeIfNeeded(t, outLoc);
-  }
-  const mini = t.create("minimixer", {
-    displayName: "Playground route",
-    positionX: 400,
-    positionY: 200,
-    gain: 1,
-  });
-  t.create("desktopAudioCable", {
-    fromSocket: outLoc,
-    toSocket: mini.fields.channel1.fields.audioInput.location,
-  });
-  const miniOut = mini.fields.mainOutput.location;
-  const stageIn = resolveStageOrCentroidAudioInputEvenIfBusy(t);
-  if (stageIn) {
-    t.create("desktopAudioCable", {
-      fromSocket: miniOut,
-      toSocket: stageIn,
-    });
-    return true;
-  }
-  return false;
-}
-
-function cablePlayerToMixerIfNeeded(t, player) {
-  const outLoc = player.fields?.audioOutput?.location;
-  if (!outLoc) return false;
-  // For ABC sample imports we prefer a consistent, visible routing chain:
-  // instrument → minimixer ("Playground route") → Stagebox/Centroid.
-  return bridgePlayerViaMinimixer(t, player);
-}
-
-function getOrCreateAbcPlayer(t, parsed, useHeisenberg) {
-  const kind = useHeisenberg ? "heisenberg" : "gakki";
-  const label =
-    parsed.title.slice(0, 52) || (useHeisenberg ? "ABC (synth)" : "ABC (piano)");
-  const existing = t.entities.ofTypes(kind).get();
-  if (existing.length > 0) return existing[0];
-  return t.create(kind, {
-    displayName: label,
+function getOrCreateGakki(t, label) {
+  const existing = t.entities.ofTypes("gakki").get();
+  if (existing.length) return existing[0];
+  return t.create("gakki", {
+    displayName: label.slice(0, 52) || "ABC",
     positionX: 160,
     positionY: 220,
     gain: 0.78,
   });
+}
+
+/** Optional: one desktopAudioCable to the first free mixer strip (keeps sample short). */
+function tryCableToMixer(t, player) {
+  const out = player.fields?.audioOutput?.location;
+  if (!out) return false;
+  if (t.entities.pointingTo.locations(out).get().length > 0) return true;
+  for (const ch of t.entities.ofTypes("mixerChannel").get()) {
+    const inLoc = ch.fields.audioInput?.location;
+    if (inLoc && t.entities.pointingTo.locations(inLoc).get().length === 0) {
+      t.create("desktopAudioCable", { fromSocket: out, toSocket: inLoc });
+      return true;
+    }
+  }
+  return false;
 }
 
 function renderScore() {
@@ -433,7 +297,7 @@ function renderScore() {
     if (!raw) throw new Error("Paste ABC first.");
     paperEl.innerHTML = "";
     abcjs.renderAbc("abc-paper", raw, { responsive: "resize" });
-    setStatus("Score rendered.");
+    setStatus("Rendered.");
   } catch (err) {
     setStatus(String(err?.message || err), true);
   }
@@ -442,37 +306,17 @@ function renderScore() {
 renderBtn.addEventListener("click", renderScore);
 renderScore();
 
-function syncImportButtonState() {
-  const ok = isSyncedCloud();
-  importBtn.disabled = false;
-  importBtn.title = ok
-    ? "Import ABC notes into synced cloud project"
-    : "Import into current engine (offline unless connected)";
-  if (!ok) setStatus("Not synced: import goes to offline engine only.");
-}
-syncImportButtonState();
-const statusTimer = setInterval(syncImportButtonState, 1000);
-window.addEventListener(
-  "beforeunload",
-  () => {
-    clearInterval(statusTimer);
-  },
-  { once: true },
-);
-
 importBtn.addEventListener("click", async () => {
   try {
-    const activeNexus = window.__NEXUS_INSTANCE__ || nexus;
-    if (window.__NEXUS_MODE__ !== "synced" || !activeNexus || typeof activeNexus.modify !== "function") {
-      throw new Error("Connect Project first. Sample import writes to synced project only.");
+    // __NEXUS_MODE__ is injected by Run (parent window); preview iframe window.* is not set.
+    if (__NEXUS_MODE__ !== "synced" || !nexus?.modify) {
+      throw new Error("Connect Project first (synced cloud).");
     }
-    setStatus("Importing...");
+    setStatus("Importing…");
     const parsed = parseAbc(sourceEl.value);
-    const useHeisenberg = false;
-    let audioRouted = false;
-    await activeNexus.modify((t) => {
+    await nexus.modify((t) => {
       const coll = t.create("noteCollection", {});
-      const player = getOrCreateAbcPlayer(t, parsed, useHeisenberg);
+      const player = getOrCreateGakki(t, parsed.title);
       const track = t.create("noteTrack", {
         player: player.location,
         orderAmongTracks: nextTrackOrderAmong(t),
@@ -501,7 +345,7 @@ importBtn.addEventListener("click", async () => {
           velocity: n.velocity,
         });
       }
-      audioRouted = cablePlayerToMixerIfNeeded(t, player);
+      tryCableToMixer(t, player);
       const minProjLen = Math.max(dur + NEXUS_TICKS_BEAT * 8, NEXUS_TICKS_SEMIBREVE * 4);
       for (const cfg of t.entities.ofTypes("config").get()) {
         const cur = cfg.fields.durationTicks?.value;
@@ -510,29 +354,11 @@ importBtn.addEventListener("click", async () => {
         }
       }
     });
-    const routeHint = audioRouted
-      ? ""
-      : " No auto audio cable — connect the instrument output to Stagebox/Centroid/minimixer in Studio.";
-    const transportHint =
-      " If playhead stays at 0: use Return (not only Space), turn Loop off, or widen loop on ruler.";
-    if (useHeisenberg) {
-      setStatus("Imported (Heisenberg)." + routeHint + transportHint);
-    } else {
-      setStatus(
-        "Imported (Gakki). First load may show yellow dots; repeat imports reuse the piano." +
-          routeHint +
-          transportHint,
-      );
-    }
-    console.log(
-      "> ABC sample import complete (" +
-        parsed.notes.length +
-        " notes)." +
-        (audioRouted ? " Audio routed." : " Manual audio cable may be needed."),
-    );
+    setStatus("Imported " + parsed.notes.length + " notes via nexus.modify.");
+    console.log("> ABC import:", parsed.notes.length, "notes");
   } catch (err) {
     setStatus(String(err?.message || err), true);
-    console.warn("ABC import failed:", err?.stack || err);
+    console.warn(err);
   }
 });`,
 };

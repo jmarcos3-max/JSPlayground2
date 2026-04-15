@@ -143,11 +143,15 @@ export function initRunUserCode() {
       const iframeWin = previewIframe.contentWindow;
       if (iframeWin) {
         installPreviewConsoleBridge(iframeWin);
+        // User code runs in the iframe; mirror parent Nexus flags so `window.__NEXUS_MODE__` works.
+        iframeWin.__NEXUS_MODE__ = window.__NEXUS_MODE__;
+        iframeWin.__NEXUS_INSTANCE__ = ctx.nexus;
       }
 
       const AsyncFunction = getIframeAsyncFunction(previewIframe);
       const runnable = stripAudiotoolNexusImports(userCode);
       // Same exports as `@audiotool/nexus` (imported at top of this file). `sdk*` names are aliases for older snippets.
+      // `__NEXUS_MODE__` is injected from the parent window — the iframe's own `window` does not mirror these globals.
       const executeUserCode = new AsyncFunction(
         "nexus",
         "Nexus",
@@ -156,6 +160,7 @@ export function initRunUserCode() {
         "createAudiotoolClient",
         "sdkGetLoginStatus",
         "sdkCreateAudiotoolClient",
+        "__NEXUS_MODE__",
         runnable,
       );
       await executeUserCode(
@@ -166,6 +171,7 @@ export function initRunUserCode() {
         createAudiotoolClient,
         getLoginStatus,
         createAudiotoolClient,
+        typeof window !== "undefined" ? window.__NEXUS_MODE__ : null,
       );
       injectPreviewPostRunHint(
         previewIframe,
