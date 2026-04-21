@@ -30,6 +30,26 @@ function isSyncedCloudProjectReady() {
   );
 }
 
+function emitCloudConnectionRequired() {
+  logToConsole("<br/>--- Running Code ---");
+  if (!ctx.audiotoolClient) {
+    logToConsole(
+      "Log in first, then connect a project (Connect Project), then run again — this sample targets Audiotool Studio sync.",
+      true,
+    );
+    emitRunFeedback(
+      "Login and connect a cloud project before running this sample.",
+      "error",
+    );
+  } else {
+    logToConsole(
+      "Connect a cloud project first: paste a Studio URL or project ID and click Connect Project, then run again.",
+      true,
+    );
+    emitRunFeedback("Connect a cloud project, then run again.", "error");
+  }
+}
+
 /**
  * Static `import … from "@audiotool/nexus"` cannot appear inside the AsyncFunction
  * body (not a module). Strip those lines so user code can match the docs; Run still
@@ -104,26 +124,18 @@ export function initRunUserCode() {
 
     const userCode = ctx.editor?.getValue() ?? "";
     if (
+      shouldUseStudioWorkflowHint(userCode) &&
+      !isSyncedCloudProjectReady()
+    ) {
+      emitCloudConnectionRequired();
+      return;
+    }
+
+    if (
       userCode.includes(CLOUD_STUDIO_RUN_MARKER) &&
       !isSyncedCloudProjectReady()
     ) {
-      logToConsole("<br/>--- Running Code ---");
-      if (!ctx.audiotoolClient) {
-        logToConsole(
-          "Log in, then connect a project (Connect Project), then run this template again — it syncs to Audiotool Studio, not only the offline engine.",
-          true,
-        );
-        emitRunFeedback(
-          "Login and connect a cloud project before running this template.",
-          "error",
-        );
-      } else {
-        logToConsole(
-          "Connect a cloud project first: paste a Studio URL or project ID and click Connect Project, then run again.",
-          true,
-        );
-        emitRunFeedback("Connect a cloud project, then run again.", "error");
-      }
+      emitCloudConnectionRequired();
       return;
     }
 

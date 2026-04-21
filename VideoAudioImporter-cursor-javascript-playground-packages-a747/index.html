@@ -350,7 +350,8 @@
     html.pg-theme-dark #top-bar #auth-btn,
     html.pg-theme-dark #top-bar #list-projects-btn,
     html.pg-theme-dark #top-bar #create-project-btn,
-    html.pg-theme-dark #top-bar #open-project-btn {
+    html.pg-theme-dark #top-bar #open-project-btn,
+    html.pg-theme-dark #top-bar #open-manual-btn {
       background: rgba(255, 255, 255, 0.07);
       border-color: rgba(255, 255, 255, 0.12);
       color: var(--text-main);
@@ -358,7 +359,8 @@
     html.pg-theme-dark #top-bar #auth-btn:hover,
     html.pg-theme-dark #top-bar #list-projects-btn:hover,
     html.pg-theme-dark #top-bar #create-project-btn:hover,
-    html.pg-theme-dark #top-bar #open-project-btn:hover {
+    html.pg-theme-dark #top-bar #open-project-btn:hover,
+    html.pg-theme-dark #top-bar #open-manual-btn:hover {
       background: rgba(255, 255, 255, 0.13);
       border-color: rgba(255, 255, 255, 0.22);
     }
@@ -557,7 +559,8 @@
     #auth-btn,
     #list-projects-btn,
     #create-project-btn,
-    #open-project-btn {
+    #open-project-btn,
+    #open-manual-btn {
       background: rgba(255, 255, 255, 0.85);
       color: var(--text-main);
       border: 1px solid var(--border-color);
@@ -566,20 +569,23 @@
     #top-bar #auth-btn,
     #top-bar #list-projects-btn,
     #top-bar #create-project-btn,
-    #top-bar #open-project-btn {
+    #top-bar #open-project-btn,
+    #top-bar #open-manual-btn {
       color: var(--text-main);
     }
     #auth-btn:hover,
     #list-projects-btn:hover,
     #create-project-btn:hover,
-    #open-project-btn:hover {
+    #open-project-btn:hover,
+    #open-manual-btn:hover {
       background: rgba(255, 255, 255, 0.95);
       border-color: rgba(31, 41, 55, 0.22);
     }
     #top-bar #auth-btn,
     #top-bar #list-projects-btn,
     #top-bar #create-project-btn,
-    #top-bar #open-project-btn {
+    #top-bar #open-project-btn,
+    #top-bar #open-manual-btn {
       color: var(--text-main);
       font-weight: 700;
     }
@@ -1328,6 +1334,35 @@
         0 18px 55px rgba(0, 0, 0, 0.4),
         0 2px 0 rgba(255, 255, 255, 0.04) inset;
     }
+    /* User manual modal: explicit palette so light mode does not inherit dark bundled modal styles */
+    #manual-modal.modal-overlay {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      background: rgba(17, 24, 39, 0.28);
+      z-index: 1250;
+    }
+    html.pg-theme-dark #manual-modal.modal-overlay {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    #manual-modal .modal {
+      width: min(920px, calc(100vw - 48px));
+      max-height: min(82vh, 920px);
+      overflow: auto;
+      background: rgba(255, 250, 240, 0.98);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow:
+        0 18px 55px rgba(31, 41, 55, 0.22),
+        0 2px 0 rgba(255, 255, 255, 0.7) inset;
+      padding: 16px;
+      color: var(--text-main);
+    }
+    html.pg-theme-dark #manual-modal .modal {
+      background: rgba(30, 41, 55, 0.98);
+      box-shadow:
+        0 18px 55px rgba(0, 0, 0, 0.4),
+        0 2px 0 rgba(255, 255, 255, 0.04) inset;
+    }
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -1339,6 +1374,41 @@
     }
     .modal-header h3 { margin: 0; font-size: 14px; }
     .modal-subtitle { margin: 0 0 12px 0; color: var(--text-muted); font-size: 13px; }
+    .manual-body {
+      max-height: min(62vh, 560px);
+      overflow: auto;
+      padding-right: 2px;
+      color: var(--text-main);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .manual-body h4 {
+      margin: 10px 0 6px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .manual-body p {
+      margin: 0 0 8px;
+      color: var(--text-muted);
+    }
+    .manual-body ol {
+      margin: 0 0 10px 18px;
+      padding: 0;
+    }
+    .manual-body li {
+      margin: 0 0 6px;
+    }
+    .manual-callout {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin: 8px 0 10px;
+      background: rgba(15, 118, 110, 0.06);
+    }
+    html.pg-theme-dark .manual-callout {
+      background: rgba(45, 212, 191, 0.1);
+    }
     .samples-list { display: grid; gap: 10px; }
     .sample-row {
       display: flex;
@@ -1503,6 +1573,52 @@
       background: linear-gradient(180deg, rgba(45, 212, 191, 0.26), rgba(45, 212, 191, 0.16));
       border-color: rgba(45, 212, 191, 0.5);
     }
+    /* Help buttons: matched pair styling */
+    #open-manual-btn,
+    #take-tour-btn {
+      min-height: 40px;
+      border-radius: 999px;
+      padding-left: 14px;
+      padding-right: 14px;
+      font-size: 14px;
+      letter-spacing: 0.01em;
+    }
+    #open-manual-btn {
+      width: 40px;
+      min-width: 40px;
+      padding: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+      color: #1f2937 !important;
+      border: 1px solid rgba(148, 163, 184, 0.45) !important;
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 2px 8px rgba(31, 41, 55, 0.08);
+      font-weight: 800;
+      font-size: 20px;
+      line-height: 1;
+      justify-content: center;
+    }
+    #open-manual-btn:hover {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border-color: rgba(15, 118, 110, 0.4) !important;
+      color: #0f766e !important;
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 6px 14px rgba(15, 118, 110, 0.12);
+    }
+    html.pg-theme-dark #open-manual-btn {
+      background: linear-gradient(180deg, rgba(148, 163, 184, 0.18), rgba(148, 163, 184, 0.1));
+      color: #e2e8f0 !important;
+      border-color: rgba(148, 163, 184, 0.4) !important;
+      box-shadow: 0 4px 10px rgba(2, 6, 23, 0.35);
+    }
+    html.pg-theme-dark #open-manual-btn:hover {
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.22), rgba(45, 212, 191, 0.14));
+      color: #ccfbf1 !important;
+      border-color: rgba(45, 212, 191, 0.45) !important;
+      box-shadow: 0 6px 14px rgba(45, 212, 191, 0.14);
+    }
 
     /* Modal close (samples): stronger contrast on cream panel */
     #close-samples-btn {
@@ -1533,6 +1649,34 @@
       border-color: rgba(45, 212, 191, 0.28);
       color: var(--accent-hover);
     }
+    #close-manual-btn {
+      background: rgba(255, 255, 255, 0.98);
+      color: #111827;
+      border: 1px solid rgba(15, 118, 110, 0.42);
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1;
+      padding: 6px 12px;
+      min-width: 2.25rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(31, 41, 55, 0.1);
+    }
+    #close-manual-btn:hover {
+      background: var(--accent-soft);
+      color: #0f766e;
+      border-color: rgba(15, 118, 110, 0.55);
+    }
+    html.pg-theme-dark #close-manual-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+    html.pg-theme-dark #close-manual-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(45, 212, 191, 0.28);
+      color: var(--accent-hover);
+    }
     .samples-modal-actions {
       display: flex;
       justify-content: flex-end;
@@ -1540,6 +1684,59 @@
       margin-top: 14px;
       padding-top: 12px;
       border-top: 1px solid var(--border-color);
+    }
+    #manual-open-pdf-btn {
+      margin-right: auto;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+      color: #115e59;
+      border: 1px solid rgba(15, 118, 110, 0.35);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 3px 10px rgba(15, 118, 110, 0.09);
+      transition: all 0.18s ease;
+    }
+    #manual-open-pdf-btn::before {
+      content: "📄";
+      font-size: 0.95em;
+      line-height: 1;
+    }
+    #manual-open-pdf-btn:hover {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border-color: rgba(15, 118, 110, 0.5);
+      color: #0f766e;
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.82) inset,
+        0 6px 14px rgba(15, 118, 110, 0.14);
+      transform: translateY(-1px);
+    }
+    #manual-open-pdf-btn:active {
+      transform: translateY(0);
+    }
+    #manual-open-pdf-btn:focus-visible {
+      outline: 2px solid rgba(15, 118, 110, 0.65);
+      outline-offset: 2px;
+    }
+    html.pg-theme-dark #manual-open-pdf-btn {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(148, 163, 184, 0.08));
+      color: var(--accent);
+      border-color: rgba(45, 212, 191, 0.35);
+      box-shadow: 0 4px 12px rgba(2, 6, 23, 0.36);
+    }
+    html.pg-theme-dark #manual-open-pdf-btn:hover {
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.2), rgba(45, 212, 191, 0.14));
+      color: var(--accent-hover);
+      border-color: rgba(45, 212, 191, 0.45);
+      box-shadow: 0 6px 14px rgba(45, 212, 191, 0.15);
+      transform: translateY(-1px);
     }
     #import-sample-btn:disabled {
       opacity: 0.55;
@@ -1802,21 +1999,24 @@
         type="button"
         id="appearance-menu-btn"
         class="appearance-menu-trigger"
-        aria-label="Appearance settings"
+        aria-label="Theme options"
+        title="Theme options"
         aria-haspopup="true"
         aria-expanded="false"
         aria-controls="appearance-menu-panel"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-          <circle cx="12" cy="12" r="3" />
+          <path d="M12 3a9 9 0 0 0 0 18h.6a2.2 2.2 0 0 0 0-4.4h-.3a2.1 2.1 0 0 1-2.1-2.1v-.6a2.1 2.1 0 0 1 2.1-2.1h1.1a2.2 2.2 0 1 0 0-4.4H12z" />
+          <circle cx="7.2" cy="9.2" r="1" />
+          <circle cx="10.6" cy="7.4" r="1" />
+          <circle cx="7.8" cy="13" r="1" />
         </svg>
       </button>
       <div
         id="appearance-menu-panel"
         class="appearance-menu-panel"
         role="group"
-        aria-label="Appearance"
+        aria-label="Theme and appearance"
         hidden
       >
         <div class="appearance-menu-field">
@@ -1883,6 +2083,7 @@
           </div>
           <div class="toolbar-cluster">
             <span class="toolbar-cluster-label">Help</span>
+            <button id="open-manual-btn" type="button" class="btn-secondary" aria-label="Open user manual" title="Open user manual">?</button>
             <button id="take-tour-btn" type="button" class="btn-secondary">Take tour</button>
           </div>
         </div>
@@ -1904,6 +2105,46 @@
       </section>
 
       <!-- Execute controls live with the editor header -->
+    </div>
+  </div>
+
+  <!-- USER MANUAL MODAL -->
+  <div id="manual-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="User manual" aria-hidden="true" style="display: none;">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h3>User Manual</h3>
+        <button id="close-manual-btn" type="button" class="btn-secondary" aria-label="Close">✕</button>
+      </div>
+      <p class="modal-subtitle">Quick guide for running samples and syncing with Audiotool Studio.</p>
+      <div class="manual-body">
+        <h4>Start fast (offline mode)</h4>
+        <ol>
+          <li>Click <strong>Samples</strong> and import a step.</li>
+          <li>Click <strong>Run Code</strong>.</li>
+          <li>Check <strong>Interactive UI Canvas</strong> and <strong>Terminal Output</strong>.</li>
+        </ol>
+
+        <h4>Studio sync workflow (cloud mode)</h4>
+        <ol>
+          <li>Click <strong>Login</strong>.</li>
+          <li>Use <strong>List Projects</strong> or paste a Studio URL/project id.</li>
+          <li>Click <strong>Connect Project</strong>.</li>
+          <li>Run code, then click <strong>Open Project</strong> to view in Studio.</li>
+        </ol>
+
+        <div class="manual-callout">
+          Some samples (like getting started Step 3/4) require cloud sync and will prompt you to connect a project first.
+        </div>
+
+        <h4>Common issues</h4>
+        <p><strong>“Connect Project first”</strong>: you are logged in, but not connected to a cloud project yet.</p>
+        <p><strong>Nothing updates in Studio</strong>: run after connection and verify status says <strong>Connected</strong>.</p>
+        <p><strong>Sample not found</strong>: hard refresh (<strong>Cmd+Shift+R</strong>) after deploy updates.</p>
+      </div>
+      <div class="samples-modal-actions">
+        <a id="manual-open-pdf-btn" class="btn-secondary" href="/docs/user-manual.pdf" target="_blank" rel="noopener noreferrer">Open full manual (PDF)</a>
+        <button id="manual-got-it-btn" type="button" class="action-btn">Got it</button>
+      </div>
     </div>
   </div>
 

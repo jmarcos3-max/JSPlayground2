@@ -89,5 +89,5 @@ await nexus.modify((t) => {
 });
 
 // Logs result (see console)
-console.log("Heisenberg created.");`,
+console.log("Heisenberg created. If connected, check your cloud project in Studio (Open Project).");`,
 };

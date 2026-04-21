@@ -25,6 +25,7 @@ import { initCreateProjectFlow } from "./createProjectFlow.js";
 import { initPreviewEmptyOverlay, primePreviewIframe } from "./previewIframe.js";
 import { initRunUserCode } from "./runUserCode.js";
 import { initOnboardingTour, startOnboardingTour } from "./onboardingTour.js";
+import { initHelpManual } from "./helpManual.js";
 
 self.MonacoEnvironment = {
   getWorker(_moduleId, label) {
@@ -312,6 +313,7 @@ initProjectsMenu(connectToProject);
 initCreateProjectFlow(connectToProject);
 initRunUserCode();
 initOnboardingTour();
+initHelpManual();
 
 document.addEventListener("click", (event) => {
   const action = event.target.closest("[data-empty-action]")?.dataset.emptyAction;

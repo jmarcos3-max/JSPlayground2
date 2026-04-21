@@ -1,4 +1,4 @@
-const TOUR_KEY = "pg_onboarding_dismissed_v3";
+const TOUR_KEY = "pg_onboarding_dismissed_v4";
 
 const steps = [
   {
@@ -18,6 +18,12 @@ const steps = [
     target: "#top-bar .toolbar-group[aria-label='Project']",
     title: "Project bar",
     body: "Sign in, create or list cloud projects, connect a project, then open Studio when you're ready.",
+  },
+  {
+    id: "manual",
+    target: "#open-manual-btn",
+    title: "Manual and docs",
+    body: "Use the ? button for the in-app quick guide, then open the full PDF manual for detailed reference.",
   },
   {
     id: "editor",
