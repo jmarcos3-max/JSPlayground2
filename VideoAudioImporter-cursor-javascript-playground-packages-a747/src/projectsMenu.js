@@ -130,7 +130,7 @@ export function initProjectsMenu(connectToProject) {
     if (!willOpen) return;
 
     try {
-      const resp = await ctx.audiotoolClient.api.projectService.listProjects({
+      const resp = await ctx.audiotoolClient.projects.listProjects({
         pageSize: 50,
         filter: "",
         pageToken: "",

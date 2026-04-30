@@ -1,6 +1,6 @@
 import {
+  audiotool,
   createAudiotoolClient,
-  getLoginStatus,
 } from "@audiotool/nexus";
 import {
   buildPreviewSrcdoc,
@@ -92,6 +92,36 @@ function formatConsoleArg(arg) {
   return String(arg);
 }
 
+async function getLoginStatusCompat(opts) {
+  const result = await audiotool(opts);
+  if (result?.status === "authenticated") {
+    return {
+      loggedIn: true,
+      login: async () => {},
+      logout: async () => result.logout(),
+      authResult: result,
+    };
+  }
+  return {
+    loggedIn: false,
+    login: async () => result?.login?.(),
+    logout: async () => {},
+    error: result?.error,
+  };
+}
+
+async function createAudiotoolClientCompat(opts = {}) {
+  if (opts?.authorization?.authResult?.status === "authenticated") {
+    return opts.authorization.authResult;
+  }
+  if (opts?.auth) {
+    return createAudiotoolClient(opts);
+  }
+  throw new Error(
+    "createAudiotoolClient expects { authorization } (legacy) or { auth } (new SDK).",
+  );
+}
+
 /** User code runs in the preview iframe; bridge its console to the playground panel. */
 function installPreviewConsoleBridge(win) {
   if (!win?.console) return;
@@ -168,8 +198,10 @@ export function initRunUserCode() {
         "nexus",
         "Nexus",
         "client",
+        "audiotool",
         "getLoginStatus",
         "createAudiotoolClient",
+        "sdkAudiotool",
         "sdkGetLoginStatus",
         "sdkCreateAudiotoolClient",
         "__NEXUS_MODE__",
@@ -179,10 +211,12 @@ export function initRunUserCode() {
         ctx.nexus,
         null,
         ctx.audiotoolClient,
-        getLoginStatus,
-        createAudiotoolClient,
-        getLoginStatus,
-        createAudiotoolClient,
+        audiotool,
+        getLoginStatusCompat,
+        createAudiotoolClientCompat,
+        audiotool,
+        getLoginStatusCompat,
+        createAudiotoolClientCompat,
         typeof window !== "undefined" ? window.__NEXUS_MODE__ : null,
       );
       injectPreviewPostRunHint(

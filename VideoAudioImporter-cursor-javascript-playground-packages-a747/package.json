@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@audiotool/nexus": "^0.0.11",
+    "@audiotool/nexus": "^0.0.15",
     "abcjs": "^6.6.2",
     "monaco-editor": "^0.55.1"
   },

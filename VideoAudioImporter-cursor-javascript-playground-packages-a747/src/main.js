@@ -5,8 +5,7 @@ import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import {
   createOfflineDocument,
-  createAudiotoolClient,
-  getLoginStatus,
+  audiotool,
 } from "@audiotool/nexus";
 import { gettingStartedSamples } from "./gettingStartedSamples.js";
 import { extractProjectId, parseProjectIdFromInput } from "./projectIds.js";
@@ -153,17 +152,21 @@ function getRedirectUrl() {
 
 async function initAuth() {
   try {
-    ctx.loginStatus = await getLoginStatus({
+    const authResult = await audiotool({
       clientId: audiotoolClientId,
       redirectUrl: getRedirectUrl(),
       scope: audiotoolScope,
     });
 
-    if (ctx.loginStatus.loggedIn) {
+    if (authResult.status === "authenticated") {
+      ctx.loginStatus = {
+        loggedIn: true,
+        login: async () => {},
+        logout: async () => authResult.logout(),
+        authResult,
+      };
       authBtn.textContent = "Logout";
-      ctx.audiotoolClient = await createAudiotoolClient({
-        authorization: ctx.loginStatus,
-      });
+      ctx.audiotoolClient = authResult;
       try {
         if (!sessionStorage.getItem("pg-signed-in-toast-shown")) {
           showToast("Signed in successfully.", "success");
@@ -173,6 +176,12 @@ async function initAuth() {
         /* ignore */
       }
     } else {
+      ctx.loginStatus = {
+        loggedIn: false,
+        login: async () => authResult.login(),
+        logout: async () => {},
+        error: authResult.error,
+      };
       authBtn.textContent = "Login";
       ctx.audiotoolClient = null;
     }
@@ -267,9 +276,7 @@ async function connectToProject(projectId, displayNameHint) {
     window.__NEXUS_MODE__ = null;
     ctx.nexus = null;
 
-    ctx.nexus = await ctx.audiotoolClient.createSyncedDocument({
-      project: projectId,
-    });
+    ctx.nexus = await ctx.audiotoolClient.open(projectId);
     await ctx.nexus.start();
     window.__NEXUS_INSTANCE__ = ctx.nexus;
     window.__NEXUS_MODE__ = "synced";
@@ -277,10 +284,10 @@ async function connectToProject(projectId, displayNameHint) {
     let projectName = (displayNameHint || "").trim();
     if (!projectName) {
       try {
-        const resp = await ctx.audiotoolClient.api.projectService.getProject({
+        const resp = await ctx.audiotoolClient.projects?.getProject?.({
           name: `projects/${projectId}`,
         });
-        projectName = resp?.project?.displayName?.trim() || "";
+        projectName = resp?.project?.displayName?.trim() || projectName;
       } catch {
         // ignore, fallback below
       }

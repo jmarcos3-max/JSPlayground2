@@ -27,6 +27,31 @@ export function installPlaygroundIntellisense(monaco) {
     declare const Nexus: null;
 
     /**
+     * Same as \`import { audiotool } from "@audiotool/nexus"\`. Run strips that import line
+     * and injects the real function from the bundle.
+     */
+    declare const audiotool: (opts: {
+      clientId: string;
+      redirectUrl: string;
+      scope: string;
+    }) => Promise<
+      | {
+          status: "authenticated";
+          userName: string;
+          logout: () => void | Promise<void>;
+          projects: {
+            listProjects: (req: any) => Promise<any>;
+            getProject?: (req: { name: string }) => Promise<any>;
+          };
+        }
+      | {
+          status: "unauthenticated";
+          login: () => void | Promise<void>;
+          error?: Error;
+        }
+    >;
+
+    /**
      * Same as \`import { getLoginStatus } from "@audiotool/nexus"\`. Run strips that import line
      * and injects the real function from the bundle.
      */
@@ -52,23 +77,22 @@ export function installPlaygroundIntellisense(monaco) {
     declare const sdkCreateAudiotoolClient: typeof createAudiotoolClient;
 
     declare const client: {
-      api: {
-        projectService: {
-          listProjects: (req: any) => Promise<any>;
-          createProject: (req: { project?: { displayName?: string } }) => Promise<any>;
-        };
-        sampleService: {
-          /** Keyword search uses "textSearch"; response has "samples", not "items". */
-          listSamples: (req: {
-            pageSize?: number;
-            pageToken?: string;
-            filter?: string;
-            orderBy?: string;
-            textSearch?: string;
-          }) => Promise<{ samples?: unknown[]; nextPageToken?: string }>;
-        };
-        userService: any;
+      projects: {
+        listProjects: (req: any) => Promise<any>;
+        createProject: (req: { project?: { displayName?: string } }) => Promise<any>;
+        getProject?: (req: { name: string }) => Promise<any>;
       };
+      samples?: {
+        /** Keyword search uses "textSearch"; response has "samples", not "items". */
+        listSamples: (req: {
+          pageSize?: number;
+          pageToken?: string;
+          filter?: string;
+          orderBy?: string;
+          textSearch?: string;
+        }) => Promise<{ samples?: unknown[]; nextPageToken?: string }>;
+      };
+      users?: any;
     } | null;
 
     declare interface Transaction {

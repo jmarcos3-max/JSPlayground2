@@ -79,7 +79,7 @@ export function initCreateProjectFlow(connectToProject) {
 
     setCreateProjectModalBusy(true);
     try {
-      const resp = await ctx.audiotoolClient.api.projectService.createProject({
+      const resp = await ctx.audiotoolClient.projects.createProject({
         project: { displayName },
       });
       const p = resp?.project;

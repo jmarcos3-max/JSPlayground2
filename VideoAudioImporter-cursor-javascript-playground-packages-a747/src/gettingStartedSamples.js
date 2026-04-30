@@ -2,10 +2,10 @@
  * “Getting started” steps (merged into `codeSamples`) — aligned with Audiotool “Getting started” docs.
  */
 export const gettingStartedSamples = {
-  sample1LoginConnect: `import { getLoginStatus } from "@audiotool/nexus";
+  sample1LoginConnect: `import { audiotool } from "@audiotool/nexus";
 
-// Check if the user is logged in
-const status = await getLoginStatus({
+// Start browser auth flow (or resume existing session)
+const at = await audiotool({
   clientId: "<your-client-id>",
   redirectUrl: "http://127.0.0.1:5173/", // must match your app settings
   scope: "project:write", // permission to modify projects
@@ -13,42 +13,41 @@ const status = await getLoginStatus({
 
 // Create a login/logout button based on current status
 const button = document.createElement("button");
-button.innerHTML = status.loggedIn ? "Logout" : "Login";
+button.innerHTML = at.status === "authenticated" ? "Logout" : "Login";
 
 // Toggle login state on click
 button.addEventListener("click", () => {
-  status.loggedIn ? status.logout() : status.login(); // redirects if logging in
+  if (at.status === "authenticated") {
+    at.logout();
+    return;
+  }
+  at.login(); // redirects if unauthenticated
 });
 
 // Attach button to the page
 document.body.appendChild(button);
 
 // If already logged in, you can continue with next steps
-if (status.loggedIn) {
-  console.log("Access granted.");
+if (at.status === "authenticated") {
+  console.log("Access granted for", at.userName);
 }`,
 
-  sample2CreateAudiotoolClient: `import { getLoginStatus, createAudiotoolClient } from "@audiotool/nexus";
+  sample2CreateAudiotoolClient: `import { audiotool } from "@audiotool/nexus";
 
-// Check if the user is logged in
-const status = await getLoginStatus({
+// Use browser auth and receive client directly when authenticated
+const at = await audiotool({
   clientId: "<your-client-id>",
   redirectUrl: "http://127.0.0.1:5173/",
   scope: "project:write",
 });
 
-// Stop here if not logged in (requires Step 1)
-// Logs result to the console
-if (!status.loggedIn) {
+if (at.status !== "authenticated") {
   console.log("Not logged in — use Step 1 (Login), then run again.");
 } else {
-  // Create an authenticated Audiotool client
-  const audiotoolClient = await createAudiotoolClient({
-    authorization: status,
-  });
-
-  // Confirm the client is ready (see console)
-  console.log("AudiotoolClient ready.", audiotoolClient != null);
+  // at IS the authenticated client
+  const projects = await at.projects.listProjects({});
+  console.log("Client ready for", at.userName);
+  console.log("Projects found:", projects?.projects?.length ?? 0);
 }`,
 
   sample3NexusEvents: `// Listen for new devices being created
