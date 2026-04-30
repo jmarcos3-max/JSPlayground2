@@ -1844,6 +1844,18 @@
       opacity: 0.65;
       cursor: not-allowed;
     }
+    html.pg-theme-dark #create-project-name-input {
+      background: rgba(15, 23, 42, 0.72);
+      color: #e5e7eb;
+      border-color: rgba(148, 163, 184, 0.34);
+    }
+    html.pg-theme-dark #create-project-name-input::placeholder {
+      color: #94a3b8;
+    }
+    html.pg-theme-dark #create-project-name-input:focus {
+      border-color: rgba(45, 212, 191, 0.6);
+      box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.14);
+    }
     .create-project-actions {
       display: flex;
       justify-content: flex-end;
@@ -1881,6 +1893,25 @@
       opacity: 0.55;
       cursor: not-allowed;
       transform: none;
+    }
+    html.pg-theme-dark .create-project-modal .create-project-close,
+    html.pg-theme-dark #create-project-cancel-btn {
+      background: rgba(255, 255, 255, 0.09);
+      color: #e5e7eb;
+      border-color: rgba(148, 163, 184, 0.34);
+      box-shadow: none;
+    }
+    html.pg-theme-dark .create-project-modal .create-project-close:hover:not(:disabled),
+    html.pg-theme-dark #create-project-cancel-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(45, 212, 191, 0.42);
+      color: #f8fafc;
+    }
+    html.pg-theme-dark .create-project-modal .create-project-close:disabled,
+    html.pg-theme-dark #create-project-cancel-btn:disabled {
+      opacity: 0.62;
+      color: #cbd5e1;
+      border-color: rgba(148, 163, 184, 0.24);
     }
 
     html.pg-theme-dark #projects-menu {
